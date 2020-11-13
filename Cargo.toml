@@ -1,0 +1,16 @@
+[package]
+name = "biotools"
+version = "0.1.0"
+authors = ["Douglas Wu <wckdouglas@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "biotools"
+crate-type = ["cdylib"]
+
+
+[dependencies]
+pyo3 = "0.12.3"
+bio = "*"
+flate2 = "1.0.19"
