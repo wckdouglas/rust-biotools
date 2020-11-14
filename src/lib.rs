@@ -23,7 +23,7 @@ fn get_fastq_reader(path: &String) -> Box<::std::io::Read> {
 }
 
 #[pyfunction]
-fn readfq(filename: String) -> PyResult<(usize, usize)>{
+fn fq_stat(filename: String) -> PyResult<(usize, usize)>{
 	let reader = fastq::Reader::new(get_fastq_reader(&filename));
     let mut basecount = 0;
     let mut readcount = 0;
@@ -41,6 +41,6 @@ fn readfq(filename: String) -> PyResult<(usize, usize)>{
 /// A Python module implemented in Rust.
 #[pymodule]
 fn biotools_lib(py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_wrapped(wrap_pyfunction!(readfq))?;
+    m.add_wrapped(wrap_pyfunction!(fq_stat))?;
     Ok(())
 }
