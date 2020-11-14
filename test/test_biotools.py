@@ -7,5 +7,6 @@ def test_count():
     data = DataDir + '/data/test.fq'
     rc, bc = biotools_lib.readfq(data)
     assert(rc == 748)
+    assert(bc == 748)
 
 test_count()
