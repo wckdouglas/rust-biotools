@@ -38,6 +38,5 @@ fn readfq(filename: String) -> PyResult<(usize, usize)>{
 #[pymodule]
 fn biotools(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(readfq, m)?)?;
-
     Ok(())
 }

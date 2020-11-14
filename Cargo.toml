@@ -13,9 +13,3 @@ crate-type = ["cdylib"]
 pyo3 = "0.12.3"
 bio = "*"
 flate2 = "1.0.19"
-
-[target.x86_64-apple-darwin]
-rustflags = [
-  "-C", "link-arg=-undefined",
-  "-C", "link-arg=dynamic_lookup",
-]
