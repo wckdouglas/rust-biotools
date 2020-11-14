@@ -6,10 +6,14 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
-name = "biotools"
+name = "biotools_lib"
 crate-type = ["cdylib"]
 
+
+[dependencies.pyo3]
+version = "0.12.3"
+features = ["extension-module"]
+
 [dependencies]
-pyo3 = "0.12.3"
 bio = "*"
 flate2 = "1.0.19"

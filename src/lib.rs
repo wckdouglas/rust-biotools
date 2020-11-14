@@ -1,3 +1,4 @@
+extern crate pyo3;
 extern crate bio;
 extern crate flate2;
 use std::string::String;
@@ -5,6 +6,7 @@ use std::io::BufReader;
 use std::fs;
 use bio::io::fastq;
 use bio::io::fastq::FastqRead;
+use pyo3::prelude::*;
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
 use flate2::bufread;
@@ -25,8 +27,10 @@ fn readfq(filename: String) -> PyResult<(usize, usize)>{
 	let reader = fastq::Reader::new(get_fastq_reader(&filename));
     let mut basecount = 0;
     let mut readcount = 0;
-	for record in reader.records(){
-        let len = record.unwrap().seq().len();
+	for result in reader.records(){
+        let record = result.expect("Error during fastq record parsing");
+        let seq = record.seq();
+        let len = seq.len();
         basecount += len;
         readcount += 1;
     }
@@ -36,7 +40,7 @@ fn readfq(filename: String) -> PyResult<(usize, usize)>{
 
 /// A Python module implemented in Rust.
 #[pymodule]
-fn biotools(py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(readfq, m)?)?;
+fn biotools_lib(py: Python, m: &PyModule) -> PyResult<()> {
+    m.add_wrapped(wrap_pyfunction!(readfq))?;
     Ok(())
 }
