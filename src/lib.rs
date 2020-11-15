@@ -55,11 +55,12 @@ fn fq_stat(filename: String) -> PyResult<(usize, usize)>{
 /// Return:
 ///     kmer_dict: dict
 ///         with kmer as key and, kmer count as value
-fn kmer_counter(seq: &str, k: usize) -> PyResult<HashMap<String, usize>>{
+fn kmer_counter(seq: String, k: usize) -> PyResult<HashMap<String, usize>>{
     let mut kmer_count: HashMap<String, usize> = HashMap::new();
     let seq_len: usize = seq.len().try_into().unwrap();
     for i in 0..(seq_len - k){
-        let kmer = utils::substring(seq, i, i+k);
+        //let kmer = utils::substring(seq, i, i+k);
+        let kmer = seq[i..(i+k)].to_string();
         *kmer_count.entry(kmer).or_insert(0) += 1;
     }
     Ok(kmer_count)
