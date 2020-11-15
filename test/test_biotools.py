@@ -12,5 +12,5 @@ def test_count():
 
 def test_kmer():
     kmer_dict = biotools_lib.kmer_counter('ACTGACTG', 3)
-    for k,v in {'GAC': 1, 'CTG': 1, 'ACT': 2, 'TGA': 1}.items():
+    for k,v in {'GAC': 1, 'CTG': 2, 'ACT': 2, 'TGA': 1}.items():
         assert(kmer_dict[k] == v)
