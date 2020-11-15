@@ -19,7 +19,7 @@ install:
 
 
     - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest
-    - source activate test-environment
+    - conda activate test-environment
     - pip install maturin
     - maturin develop
 # # command to run tests
