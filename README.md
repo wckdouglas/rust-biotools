@@ -1,6 +1,8 @@
 # biotools # 
 
 ![](https://travis-ci.org/wckdouglas/biotools.svg?branch=main)
+[![codecov](https://codecov.io/gh/wckdouglas/biotools/branch/main/graph/badge.svg)](https://codecov.io/gh/wckdouglas/biotools)
+
 
 A playground for implementing functions in Rust and porting into python
 
