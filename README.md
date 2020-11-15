@@ -1,5 +1,7 @@
 # biotools # 
 
+![](https://travis-ci.org/wckdouglas/biotools.svg?branch=main)
+
 A playground for implementing functions in Rust and porting into python
 
 ## Setting up environment ##
