@@ -2,29 +2,31 @@ extern crate pyo3;
 extern crate bio;
 extern crate flate2;
 use std::string::String;
-use std::io::BufReader;
-use std::fs;
+use std::collections::HashMap;
+use std::convert::TryInto;
 use bio::io::fastq;
-use bio::io::fastq::FastqRead;
-use pyo3::prelude::*;
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
-use flate2::bufread;
+mod utils;
 
-fn get_fastq_reader(path: &String) -> Box<::std::io::Read> {
-    // borrowed from 
-    // https://github.com/sndrtj/fastq-count/blob/master/src/main.rs
-    if path.ends_with(".gz") {
-        let f = fs::File::open(path).unwrap();
-        Box::new(bufread::MultiGzDecoder::new(BufReader::new(f)))
-    } else {
-        Box::new(fs::File::open(path).unwrap())
-    }
-}
+
 
 #[pyfunction]
+/// ---
+/// 
+/// Function to calculate how many bases and how many record in the fastq file
+/// 
+/// Args:
+///     filename: str
+///         full path to the fastq file, can be gz zipped file
+/// 
+/// return:
+///     read_count: int
+///         how many reads are in the fastq file?
+///     base_count: int
+///         how many bases in total are in the fastq file?
 fn fq_stat(filename: String) -> PyResult<(usize, usize)>{
-	let reader = fastq::Reader::new(get_fastq_reader(&filename));
+	let reader = fastq::Reader::new(utils::get_fastq_reader(&filename));
     let mut basecount = 0;
     let mut readcount = 0;
 	for result in reader.records(){
@@ -38,9 +40,37 @@ fn fq_stat(filename: String) -> PyResult<(usize, usize)>{
 }
 
 
+#[pyfunction]
+#[text_signature = "(seq, k, /)"]
+/// --
+///
+/// counting kmer from the input sequence
+/// 
+/// Args:
+///     seq: str
+///         read sequence
+///     k: int
+///         kmer size
+/// 
+/// Return:
+///     kmer_dict: dict
+///         with kmer as key and, kmer count as value
+fn kmer_counter(seq: &str, k: usize) -> PyResult<HashMap<String, usize>>{
+    let mut kmer_count: HashMap<String, usize> = HashMap::new();
+    let seq_len: usize = seq.len().try_into().unwrap();
+    for i in 0..(seq_len - k){
+        let kmer = utils::substring(seq, i, i+k);
+        *kmer_count.entry(kmer).or_insert(0) += 1;
+    }
+    Ok(kmer_count)
+}
+
+
+
 /// A Python module implemented in Rust.
 #[pymodule]
 fn biotools_lib(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(fq_stat))?;
+    m.add_wrapped(wrap_pyfunction!(kmer_counter))?;
     Ok(())
 }
