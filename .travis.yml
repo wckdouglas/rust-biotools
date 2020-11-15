@@ -7,11 +7,11 @@ install:
   - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
-  - if [ ! -d ~/rust-installer ]; then 
-      mkdir ~/rust-installer
-      curl -sL https://static.rust-lang.org/rustup.sh -o ~/rust-installer/rustup.sh
-      sh ~/rust-installer/rustup.sh --prefix=~/rust --spec=nightly --disable-sudo -y 
-    fi
+  # install rust
+  - mkdir ~/rust-installer
+  - curl -sL https://static.rust-lang.org/rustup.sh -o ~/rust-installer/rustup.sh
+  - sh ~/rust-installer/rustup.sh --prefix=~/rust --spec=nightly --disable-sudo -y 
+  # install python via miniconda
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
   - source "$HOME/miniconda/etc/profile.d/conda.sh"
