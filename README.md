@@ -1,6 +1,6 @@
 # biotools # 
 
-![](https://travis-ci.org/wckdouglas/biotools.svg?branch=main)
+[![Build Status](https://travis-ci.org/wckdouglas/biotools.svg?branch=main)](https://travis-ci.org/wckdouglas/biotools)
 [![codecov](https://codecov.io/gh/wckdouglas/biotools/branch/main/graph/badge.svg)](https://codecov.io/gh/wckdouglas/biotools)
 
 
