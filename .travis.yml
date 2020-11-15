@@ -22,6 +22,8 @@ install:
     - conda activate test-environment
     - unset VIRTUAL_ENV
     - pip install maturin
+    - ls -lsa
+    - pwd
     - maturin develop
 # # command to run tests
 script: 
