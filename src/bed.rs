@@ -7,9 +7,13 @@ use pyo3::PyResult;
 pub struct BedRecord {
     #[pyo3(get, set)]
     pub chrom: String,
+    #[pyo3(get, set)]
     pub start: i32,
+    #[pyo3(get, set)]
     pub end: i32,
+    #[pyo3(get, set)]
     pub name: String,
+    #[pyo3(get, set)]
     pub strand: String
 }
 
