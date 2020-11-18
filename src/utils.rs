@@ -20,7 +20,7 @@ pub fn get_fastq_reader(path: &String) -> Box<::std::io::Read> {
 
 // The output is wrapped in a Result to allow matching on errors
 // Returns an Iterator to the Reader of the lines of the file.
-fn read_lines<P>(filename: P) -> Result<Lines<BufReader<fs::File>>>
+pub fn read_lines<P>(filename: P) -> Result<Lines<BufReader<fs::File>>>
 where P: AsRef<Path>, {
     let file = fs::File::open(filename)?;
     Ok(BufReader::new(file).lines())

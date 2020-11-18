@@ -2,10 +2,10 @@ use std::string::String;
 use std::format;
 use pyo3::prelude::*;
 use pyo3::PyResult;
-use pyo3::types::PyString;
 
 #[pyclass]
 pub struct BedRecord {
+    #[pyo3(get, set)]
     pub chrom: String,
     pub start: i32,
     pub end: i32,
@@ -37,26 +37,4 @@ impl BedRecord {
         Ok(format!("{}:{}-{}", self.chrom, self.start, self.end))
     }
 
-    #[getter]
-    fn start(&self) -> PyResult<i32> {
-        Ok(self.start)
-    }
-
-    #[getter]
-    fn end(&self) -> PyResult<i32> {
-        Ok(self.end)
-    }
-
-    
-    /*
-    #[getter]
-    fn name(&self) -> PyResult<String> {
-        Ok(self.name)
-    }
-
-    #[getter]
-    fn strand(&self) -> PyResult<String> {
-        Ok(self.strand)
-    }
-    */
 }

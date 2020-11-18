@@ -22,4 +22,5 @@ def test_bed():
         bedline = next(f)
         r = biotools_lib.BedRecord(bedline.strip())
         assert(r.start == 3192856)
+        assert(r.start == "chr1")
         assert(r.coordinate == 'chr1:3192856-3192888')
