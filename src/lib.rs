@@ -8,6 +8,7 @@ use bio::io::fastq;
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
 mod utils;
+mod bed;
 
 
 
@@ -73,5 +74,6 @@ fn kmer_counter(seq: String, k: usize) -> PyResult<HashMap<String, usize>>{
 fn biotools_lib(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(fq_stat))?;
     m.add_wrapped(wrap_pyfunction!(kmer_counter))?;
+    m.add_class::<bed::BedRecord>()?;
     Ok(())
 }

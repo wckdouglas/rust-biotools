@@ -1,7 +1,9 @@
 use std::string::String;
 use flate2::bufread;
-use std::io::BufReader;
+use std::io::{BufReader, Lines, Result};
 use std::fs;
+use std::io::prelude::*;
+use std::path::Path;
 
 
 pub fn get_fastq_reader(path: &String) -> Box<::std::io::Read> {
@@ -14,3 +16,14 @@ pub fn get_fastq_reader(path: &String) -> Box<::std::io::Read> {
         Box::new(fs::File::open(path).unwrap())
     }
 }
+
+
+// The output is wrapped in a Result to allow matching on errors
+// Returns an Iterator to the Reader of the lines of the file.
+fn read_lines<P>(filename: P) -> Result<Lines<BufReader<fs::File>>>
+where P: AsRef<Path>, {
+    let file = fs::File::open(filename)?;
+    Ok(BufReader::new(file).lines())
+}
+
+
