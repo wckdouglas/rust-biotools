@@ -26,17 +26,17 @@ mod utils;
 ///     base_count: int
 ///         how many bases in total are in the fastq file?
 fn fq_stat(filename: String) -> PyResult<(usize, usize)>{
-	let reader = fastq::Reader::new(utils::get_fastq_reader(&filename));
+    let reader = fastq::Reader::new(utils::get_fastq_reader(&filename));
     let mut basecount = 0;
     let mut readcount = 0;
-	for result in reader.records(){
+    for result in reader.records(){
         let record = result.expect("Error during fastq record parsing");
         let seq = record.seq();
         let len = seq.len();
         basecount += len;
         readcount += 1;
     }
-	Ok((readcount, basecount))
+    Ok((readcount, basecount))
 }
 
 
