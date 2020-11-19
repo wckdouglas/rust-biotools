@@ -41,11 +41,18 @@ pub struct Transcript {
 pub struct Gene {
     pub chrom: String,
     pub strand: String,
-    pub transcripts: HashMap<String, &Transcript>
+    pub transcripts: HashMap<String, Transcript>
 }
 
 impl Gene {
-    pub fn add_transcript(&mut self, rnaId: &String, transcript: &Transcript){
+    pub fn new (chrom: String, strand: String) -> Self{
+        let transcripts: HashMap<String, Transcript> = HashMap::new();
+        Self{chrom: chrom,
+            strand: strand,
+            transcripts: transcripts}
+    }
+
+    pub fn add_transcript(&mut self, rnaId: &String, transcript: Transcript){
         self.transcripts.insert((&rnaId).to_string(), 
                                 transcript);
     }
@@ -65,19 +72,11 @@ impl Transcriptome {
                 if let l = line.unwrap().to_string() {
                     let fields: Vec<&str> = l.trim().split('\t').collect();
                     let (gene_name, rnaId, chrom, strand, transcript) = Self::parse_transcript(fields);
-                    let mut transcripts: HashMap<String, Transcript> = HashMap::new();
-                    transcripts.insert(rnaId, transcript);
-                    let mut gene = Gene{chrom: chrom,
-                                        strand: strand,
-                                        transcripts: transcripts};
-                    if ! transcriptome.contains_key(&gene_name){
-                        transcriptome.insert(gene_name, gene);
-                    } else {
-                        transcriptome
-                            .entry(gene_name)
-                            .or_insert(gene)
-                            .add_transcript( &rnaId, transcript ) ;
-                    }
+                    let mut gene = Gene::new(chrom, strand);
+                    transcriptome
+                        .entry(gene_name)
+                        .or_insert(gene)
+                        .add_transcript( &rnaId, transcript) ;
                 }
             }
         }
