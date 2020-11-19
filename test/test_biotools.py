@@ -1,6 +1,26 @@
 import os
+from urllib.request import Request, urlopen
 import biotools_lib
+import gzip
 DataDir = os.path.dirname(os.path.abspath(__file__))
+
+
+def test_transcriptome():
+    refFlat = DataDir + '/data/test.refFlat'
+    url = 'http://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/refFlat.txt.gz'
+    if not os.path.isfile(refFlat):
+        req = Request(url)
+        response = urlopen(req)
+        with open(refFlat, 'w') as f:
+            for line in gzip\
+                    .decompress(response.read())\
+                    .decode()\
+                    .split('\n')[:100]:
+                print(line, file = f)
+
+
+        
+
 
 
 def test_count():
@@ -24,3 +44,5 @@ def test_bed():
         assert(r.start == 3192856)
         assert(r.chrom == "chr1")
         assert(r.coordinate == 'chr1:3192856-3192888')
+        assert(r.overlap(3192877, 3192900))
+        assert(not r.overlap(3192889, 3192900))

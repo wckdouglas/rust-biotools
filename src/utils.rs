@@ -6,7 +6,7 @@ use std::io::prelude::*;
 use std::path::Path;
 
 
-pub fn get_fastq_reader(path: &String) -> Box<::std::io::Read> {
+pub fn read_file(path: &String) -> Box<::std::io::Read> {
     // borrowed from 
     // https://github.com/sndrtj/fastq-count/blob/master/src/main.rs
     if path.ends_with(".gz") {

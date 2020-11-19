@@ -27,7 +27,7 @@ mod bed;
 ///     base_count: int
 ///         how many bases in total are in the fastq file?
 fn fq_stat(filename: String) -> PyResult<(usize, usize)>{
-    let reader = fastq::Reader::new(utils::get_fastq_reader(&filename));
+    let reader = fastq::Reader::new(utils::read_file(&filename));
     let mut basecount = 0;
     let mut readcount = 0;
     for result in reader.records(){
