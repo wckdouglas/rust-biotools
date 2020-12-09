@@ -9,6 +9,7 @@ use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
 mod utils;
 mod bed;
+mod bed12;
 
 
 
@@ -75,5 +76,6 @@ fn biotools_lib(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(fq_stat))?;
     m.add_wrapped(wrap_pyfunction!(kmer_counter))?;
     m.add_class::<bed::BedRecord>()?;
+    m.add_class::<bed12::Bed12Record>()?;
     Ok(())
 }

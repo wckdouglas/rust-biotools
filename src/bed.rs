@@ -19,7 +19,6 @@ pub struct BedRecord {
 }
 
 
-
 #[pymethods]
 impl BedRecord {
     #[new]

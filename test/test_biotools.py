@@ -46,3 +46,13 @@ def test_bed():
         assert(r.coordinate == 'chr1:3192856-3192888')
         assert(r.overlap(3192877, 3192900))
         assert(not r.overlap(3192889, 3192900))
+
+def test_bed12():
+    data = DataDir + '/data/test.bed12'
+    with open(data, 'r') as f:
+        bedline = next(f)
+        r = biotools_lib.Bed12Record(bedline.strip())
+        assert(r.start == 45691195)
+        assert(r.chrom == "chr8")
+        assert(r.coordinate == 'chr8:45691195-45809133')
+        assert(r.overlap(45691180,45691200))
