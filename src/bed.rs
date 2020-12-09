@@ -45,10 +45,7 @@ impl BedRecord {
     fn coordinate(&self) -> PyResult<String> {
         Ok(format!("{}:{}-{}", self.chrom, self.start, self.end))
     }
-}
 
-#[pymethods]
-impl BedRecord{
     pub fn overlap(&self, start: i32, end: i32) -> PyResult<bool>{
         if max(self.start, start) <= min(self.end, end) {
             Ok(true)
