@@ -56,3 +56,4 @@ def test_bed12():
         assert(r.chrom == "chr8")
         assert(r.coordinate == 'chr8:45691195-45809133')
         assert(r.overlap(45691180,45691200))
+        print(r.blockStarts)
