@@ -19,10 +19,6 @@ def test_transcriptome():
                 print(line, file = f)
 
 
-        
-
-
-
 def test_count():
     data = DataDir + '/data/test.fq'
     rc, bc = biotools_lib.fq_stat(data)
@@ -47,6 +43,7 @@ def test_bed():
         assert(r.overlap(3192877, 3192900))
         assert(not r.overlap(3192889, 3192900))
 
+
 def test_bed12():
     data = DataDir + '/data/test.bed12'
     with open(data, 'r') as f:
@@ -56,8 +53,23 @@ def test_bed12():
         assert(r.chrom == "chr8")
         assert(r.coordinate == 'chr8:45691195-45809133')
         assert(r.overlap(45691180,45691200))
+        assert(not r.overlap(45691290,45694369))
         assert(r.block_starts[0] == 45691195)
         assert(r.block_starts[-1] == 45691195 + 115101)
         assert(r.block_ends[0] == 45691195 + 94)
         assert(r.block_ends[-1] == (45691195 + 115101 + 2837))
         assert(r.block_ends[-1] == r.end)
+
+        bedline = next(f)
+        r = biotools_lib.Bed12Record(bedline.strip())
+        assert(r.end == 74484164)
+        assert(r.chrom == "chrX")
+        assert(r.coordinate == 'chrX:74440264-74484164')
+        assert(r.block_starts[0] == 43858 + 74440264)
+        assert(r.block_starts[-1] == 0 + 74440264 )
+        
+        assert(r.block_ends[0] == 74440264 + 43858 + 42)
+        assert(r.block_ends[-1] == 74440264 + 0 + 1073)
+        assert(r.block_ends[0] == r.end)
+
+

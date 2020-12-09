@@ -51,7 +51,11 @@ impl Bed12Record {
         let block_sizes: Vec<i32> = it.next().expect("no blockSizes field").to_string().trim_end_matches(',').split(",").map(|x| x.parse::<i32>().unwrap()).collect();
         let mut block_starts: Vec<i32> = it.next().expect("no blockStarts field").to_string().trim_end_matches(',').split(",").map(|x| x.parse::<i32>().unwrap()).collect();
         block_starts = block_starts.into_iter().map(|x| x + start).collect();
-        let (block_starts, block_ends) = adding(block_starts, block_sizes);
+        let (mut block_starts, mut block_ends) = adding(block_starts, block_sizes);
+        if strand == "-" {
+            block_starts.reverse();
+            block_ends.reverse();
+        }
         Self{
             chrom: chrom,
             start: start,
@@ -73,13 +77,25 @@ impl Bed12Record {
         Ok(format!("{}:{}-{}", self.chrom, self.start, self.end))
     }
 
+    /// ---
+    /// 
+    /// Function to check overlap between ranges
+    /// 
+    /// Args:
+    ///     start (int): leftmost position of the range
+    ///     end (int): rightmost position of the range
+    /// 
+    /// return:
+    ///     boolean: True if overlap
     pub fn overlap(&self, start: i32, end: i32) -> PyResult<bool>{
-        if max(self.start, start) <= min(self.end, end) {
-            Ok(true)
-        }else{
-            Ok(false)
+        for (s, e) in self.block_starts.iter().zip(self.block_ends.iter()){
+            if max(s, &start) <= min(e, &end) {
+                return Ok(true);
+            }
         }
+        return Ok(false);
     }
+
 }
 
 fn adding(starts: Vec<i32>, sizes: Vec<i32>) -> (Vec<i32>,Vec<i32>){
