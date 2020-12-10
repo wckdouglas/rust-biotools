@@ -21,7 +21,7 @@ pub struct BedRecord {
 
 #[derive(Debug, Clone)]
 pub struct Exon {
-    pub start: i32,
+    pub start: i32, 
     pub end: i32,
     pub exon_length: i32,
     pub coding_exon: bool,

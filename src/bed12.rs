@@ -8,15 +8,20 @@ use std::cmp::{max,min};
 #[derive(Debug, Clone)]
 pub struct Exon {
     #[pyo3(get, set)]
-    pub tstart: i32, // transcript start
+    /// transcript start
+    pub tstart: i32, 
     #[pyo3(get, set)]
-    pub tend: i32, // transcript end
+    /// transcript end
+    pub tend: i32, 
     #[pyo3(get, set)]
-    pub gstart: i32, // genome start
+    /// genome start
+    pub gstart: i32, 
     #[pyo3(get, set)]
-    pub gend: i32, // genome end
+    /// genome end
+    pub gend: i32, 
     #[pyo3(get, set)]
-    pub exon_size: i32, // size of exon
+    /// size of exon
+    pub exon_size: i32, 
 }
 
 
@@ -55,26 +60,37 @@ impl Exon {
 #[pyclass]
 pub struct Bed12Record {
     #[pyo3(get, set)]
+    /// genomic start of the transcript
     pub chrom: String,
     #[pyo3(get, set)]
+    /// genomic start of the transcript
     pub start: i32,
     #[pyo3(get, set)]
+    /// genomic end of the transcript
     pub end: i32,
     #[pyo3(get, set)]
+    /// transcript name
     pub name: String,
     #[pyo3(get, set)]
+    /// score as annotated in the file
     pub score: i32,
     #[pyo3(get, set)]
+    /// strand on genome, "+" or """"
     pub strand: String,
     #[pyo3(get, set)]
+    /// coding start site on the genomic position
     pub coding_start: i32,
     #[pyo3(get, set)]
+    /// coding end site on the genomic position
     pub coding_end: i32,
     #[pyo3(get, set)]
-    pub block_count: i32,
+    /// number of exons in the transcript
+    pub exon_count: i32,
     #[pyo3(get)]
-    pub exons: Vec<Exon>, //exon 1 always at Vec[0], reversed for reverse strand
+    /// list of exons; exon 1 always at Vec[0], reversed for reverse strand
+    pub exons: Vec<Exon>, 
     #[pyo3(get, set)]
+    /// size of transcript, number of nucleotide
     pub transcript_length: i32,
 }
 
@@ -82,6 +98,16 @@ pub struct Bed12Record {
 #[pymethods]
 impl Bed12Record {
     #[new]
+    ///
+    /// Making a new transcript record from a bed12 line
+    /// 
+    /// Args: 
+    ///     bedline (str): bed12 line
+    /// 
+    /// Usage::
+    ///     bedline = 'chr1\t67092164\t67134970\tNM_001276352.2\t0\t-\t67093579\t67127240\t0\t9\t1440,70,145,68,113,158,92,86,41,\t0,4087,11073,19412,23187,33587,35001,38977,42765,'
+    ///     Bed12Record(bedline)
+    /// 
     pub fn new(bedline: String) -> Self {
         let v: Vec<&str> = bedline.trim().split("\t").collect();
         let mut it = v.iter();
@@ -94,7 +120,7 @@ impl Bed12Record {
         let coding_start: i32 = it.next().expect("no thickStart field").parse().unwrap();
         let coding_end: i32 = it.next().expect("no thickEnd field").parse().unwrap();
         let _ = it.next().expect("no thickEnd field").to_string();
-        let block_count: i32 = it.next().expect("no BlockCount field").parse().unwrap();
+        let exon_count: i32 = it.next().expect("no BlockCount field").parse().unwrap();
         let block_sizes: Vec<i32> = it.next().expect("no blockSizes field").to_string().trim_end_matches(',').split(",").map(|x| x.parse::<i32>().unwrap()).collect();
         let transcript_length: i32 = block_sizes.iter().sum();
         let mut block_starts: Vec<i32> = it.next().expect("no blockStarts field").to_string().trim_end_matches(',').split(",").map(|x| x.parse::<i32>().unwrap()).collect();
@@ -114,7 +140,7 @@ impl Bed12Record {
             strand: strand,
             coding_start: coding_start,
             coding_end: coding_end,
-            block_count: block_count,
+            exon_count: exon_count,
             exons: exon_vec,
             transcript_length: transcript_length,
         }
