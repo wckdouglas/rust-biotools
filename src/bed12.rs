@@ -5,6 +5,7 @@ use pyo3::{Py, PyResult};
 use std::cmp::{max,min};
 
 #[pyclass]
+#[derive(Debug, Clone)]
 pub struct Exon {
     #[pyo3(get, set)]
     pub tstart: i32, // transcript start
@@ -31,8 +32,8 @@ impl Exon {
     }
 
     fn gcontains(self, gpos: i32) -> bool {
-        /// contain genomic coordinate
-        if exon.gstart <= gpos && gpos <= self.end {
+        // contain genomic coordinate
+        if self.gstart <= gpos && gpos <= self.gend {
             return true
         }
         else {
@@ -41,8 +42,8 @@ impl Exon {
     }
 
     fn tcontains(self, tpos: i32) -> bool {
-        /// contain transcript coordinate
-        if exon.tstart <= tpos && tpos <= self.tend {
+        // contain transcript coordinate
+        if self.tstart <= tpos && tpos <= self.tend {
             return true
         } else {
             return false
@@ -120,32 +121,6 @@ impl Bed12Record {
     }
 
 
-    fn parse_exons(exon_start_vec: Vec<i32>, exon_end_vec: Vec<i32>) -> Vec<Exon>{
-        /*
-
-        Parsing the last two columns from bed12 file to make exons:
-
-        Forward strand transcripts:
-        5' |=========|---|========|---------|========|--------|=====|> 3'
-            exon 1          exon 2            exon 3           exon 4
-
-        3' <|=========|---|========|---------|========|--------|=====| 5'
-            exon 4          exon 3            exon 2           exon 1
-
-        */
-        let mut exon_vec = vec![];
-        assert_eq!(exon_end_vec.len(), exon_start_vec.len());
-        let zipped = exon_start_vec.iter().zip(exon_end_vec.iter());
-        let mut tpos = 0; // track how many transcript bases has been seen
-        for (exon_start, exon_end) in zipped {
-            let exon = Exon::new(gstart, gend, tpos + 1);
-            tpos = tpos + exon.exon_size;
-            exon_vec.push(exon);
-            }
-        }
-        exon_vec
-    }
-
     #[getter]
     fn coordinate(&self) -> PyResult<String> {
         Ok(format!("{}:{}-{}", self.chrom, self.start, self.end))
@@ -163,7 +138,7 @@ impl Bed12Record {
     ///     boolean: True if overlap
     pub fn overlap(&self, start: i32, end: i32) -> PyResult<bool>{
         for exon in self.exons.iter() {
-            if max(exon.gstart, &start) <= min(exon.gend, &end) {
+            if max(exon.gstart, start) <= min(exon.gend, end) {
                 return Ok(true);
             }
         }
@@ -180,7 +155,7 @@ impl Bed12Record {
     /// 
     /// return:
     ///     tuple(list, list): A tuple of list of block starts, and block ends
-    pub fn blocks(&self, tstart: i32, tend: i32) -> PyResult<(Vec<i32>, Vec<i32>)>{
+    pub fn blocks(&self, tstart: i32, tend: i32) -> PyResult<(Vec<i32>, Vec<i32>)> {
         assert!(tend <= self.transcript_length);
         assert!(tstart < tend);
         assert!(tstart > 0);
@@ -191,12 +166,13 @@ impl Bed12Record {
         let exon_start = 0;
         let exon_end = 0;
         let mut collect = 0;
-        let mut start_offset = 0
-        let mut end_offset = 0
+        let mut start_offset = 0;
+        let mut end_offset = 0;
         
         for exon in self.exons.iter() {
             if exon.tcontains(tstart) {
                 start_offset = tstart - exon.tstart;
+                collect = 1;
                 if exon.tcontains(tend) {
                     /* contain CDS and CDE 
                     CDS           CDE
@@ -204,7 +180,7 @@ impl Bed12Record {
                     |===================|-----------|============|
                         (this exon)
                     */
-                    collect = 1;
+                    collect = 0;
                     end_offset = tend - exon.tstart;
                     if self.strand == "-" {
                         block_start = exon.gend - end_offset;
@@ -215,96 +191,86 @@ impl Bed12Record {
                     }
                 }
                 else {
-
-
-                }
-
-            } else if collect != 0{
-
-            }
-
-
-                    if exon_start <= cds_end && cds_end <= exon_end {
-                        contain_cde = true;
-                        let exon = Exon::new(exon_start,
-                                            exon_end,
-                                            coding_exon,
-                                            contain_cds,
-                                            contain_cde);
-                        exon_vec.push(exon);
-                        coding_exon = false; //no more coding exon after this
-                    } else{
-                        /* contain CDS but no 
-                        CDS                                     CDE
-                            |->                                    ||
-                        |===================|--------------|===========|
-                            (this exno)
-                        */
-                        contain_cde = false;
-                        let exon = Exon::new(exon_start,
-                                            exon_end,
-                                            coding_exon,
-                                            contain_cds,
-                                            contain_cde);
-                        exon_vec.push(exon);
-    
-                    }
-                }else {
-                    contain_cds = false;
-                    if exon_start <= cds_end && cds_end <= exon_end{
-                        /* doesn't contain CDS but contain CDE
-                        CDS                                 CDE
-                            |->                                ||
-                        |===================|-----------|============|
-                                                            (this exon)
-                        */
-                        contain_cde = true;
-                        let exon = Exon::new(exon_start,
-                                            exon_end,
-                                            coding_exon,
-                                            contain_cds,
-                                            contain_cde);
-                        exon_vec.push(exon);
-                        coding_exon = false;
-                    }else{
-                        /* doesn't contain CDS but contain CDE
-                        CDS                                                     CDE
-                            |->                                                   ||
-                        |===================|-----------|============|-------|========|
-                                                            (this exon)
-                        */
-                        contain_cde = false;
-                        let exon = Exon::new(exon_start,
-                                            exon_end,
-                                            coding_exon,
-                                            contain_cds,
-                                            contain_cde);
-                        exon_vec.push(exon);
+                    /* contain CDS but no 
+                    CDS                                     CDE
+                        |->                                    ||
+                    |===================|--------------|===========|
+                        (this exno)
+                    */
+                    if self.strand == "-" {
+                        block_start = exon.gstart;
+                        block_end = exon.gend - start_offset;
+                    } else {
+                        block_start = exon.gstart + start_offset;
+                        block_end = exon.gend;
                     }
                 }
-    
-            } else{
-                // non coding RNA
-                contain_cds = false;
-                contain_cde = false;
-                coding_exon = false;
-                let exon = Exon::new(exon_start,
-                                    exon_end,
-                                    coding_exon,
-                                    contain_cds,
-                                    contain_cde);
-                exon_vec.push(exon);
+                block_ends.push(block_end);
+                block_starts.push(block_start);
+            } else if collect == 1 {
+                if exon.tcontains(tend){
+                    /* doesn't contain CDS but contain CDE
+                    CDS                                 CDE
+                        |->                                ||
+                    |===================|-----------|============|
+                                                        (this exon)
+                    */
+                    collect = 0;
+                    end_offset = tend - exon.tstart;
+                    if self.strand == "-" {
+                        block_start = exon.gend - end_offset;
+                        block_end = exon.gend;
+                    } else {
+                        block_start = exon.gstart;
+                        block_end = exon.gstart + end_offset;
+                    }
+                } else {
+                    /* doesn't contain CDS but contain CDE
+                    CDS                                                     CDE
+                        |->                                                   ||
+                    |===================|-----------|============|-------|========|
+                                                        (this exon)
+                    */
+                    block_start = exon.gstart;
+                    block_end = exon.gend;
+                }
+                block_ends.push(block_end);
+                block_starts.push(block_start);
             }
         }
 
-
-
-
-
+        if self.strand == "-" {
+            block_starts.reverse();
+            block_ends.reverse();
         }
-
-    }
         Ok((block_starts, block_ends))
+    }
+}
+
+
+fn parse_exons(exon_start_vec: Vec<i32>, exon_end_vec: Vec<i32>) -> Vec<Exon>{
+    /*
+
+    Parsing the last two columns from bed12 file to make exons:
+
+    Forward strand transcripts:
+    5' |=========|---|========|---------|========|--------|=====|> 3'
+        exon 1          exon 2            exon 3           exon 4
+
+    3' <|=========|---|========|---------|========|--------|=====| 5'
+        exon 4          exon 3            exon 2           exon 1
+
+    */
+    let mut exon_vec = vec![];
+    assert_eq!(exon_end_vec.len(), exon_start_vec.len());
+    let zipped = exon_start_vec.into_iter().zip(exon_end_vec.into_iter());
+    let mut tpos = 0; // track how many transcript bases has been seen
+    for (exon_start, exon_end) in zipped {
+        let exon = Exon::new(exon_start, exon_end, tpos + 1);
+        tpos = tpos + exon.exon_size;
+        exon_vec.push(exon);
+    }
+    exon_vec
 }
 
 fn adding(starts: Vec<i32>, sizes: Vec<i32>) -> (Vec<i32>,Vec<i32>){
