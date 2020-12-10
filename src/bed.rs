@@ -19,6 +19,17 @@ pub struct BedRecord {
 }
 
 
+#[derive(Debug, Clone)]
+pub struct Exon {
+    pub start: i32,
+    pub end: i32,
+    pub exon_length: i32,
+    pub coding_exon: bool,
+    pub contain_cds: bool,
+    pub contain_cde: bool,
+}
+
+
 #[pymethods]
 impl BedRecord {
     #[new]
@@ -46,6 +57,16 @@ impl BedRecord {
         Ok(format!("{}:{}-{}", self.chrom, self.start, self.end))
     }
 
+    /// ---
+    /// 
+    /// Function to check overlap between ranges
+    /// 
+    /// Args:
+    ///     start (int): leftmost position of the range
+    ///     end (int): rightmost position of the range
+    /// 
+    /// return:
+    ///     boolean: True if overlap
     pub fn overlap(&self, start: i32, end: i32) -> PyResult<bool>{
         if max(self.start, start) <= min(self.end, end) {
             Ok(true)
