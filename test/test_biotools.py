@@ -73,3 +73,19 @@ def test_bed12():
         assert(r.block_ends[0] == r.end)
 
 
+def test_block():
+    data = DataDir + '/data/test.bed12'
+    with open(data, 'r') as f:
+        bedline = next(f)
+        r = biotools_lib.Bed12Record(bedline.strip())
+        block_starts, block_ends = r.blocks(10,280)
+
+        assert(len(block_starts) == 3)
+        assert(block_starts[0] == r.start + 10 + 1)
+        assert(block_starts[1] == r.exons[1].gstart)
+        assert(block_starts[2] == r.exons[2].gstart)
+        assert(block_ends[0] == r.exons[0].gend)
+        assert(block_ends[1] == r.exons[1].gend)
+        assert(block_ends[2] == r.exons[2].gstart + 38  - 1)
+
+

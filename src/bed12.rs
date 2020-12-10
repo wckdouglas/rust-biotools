@@ -31,7 +31,7 @@ impl Exon {
             exon_size: exon_size}
     }
 
-    fn gcontains(self, gpos: i32) -> bool {
+    fn gcontains(&self, gpos: i32) -> bool {
         // contain genomic coordinate
         if self.gstart <= gpos && gpos <= self.gend {
             return true
@@ -41,7 +41,7 @@ impl Exon {
         }
     }
 
-    fn tcontains(self, tpos: i32) -> bool {
+    fn tcontains(&self, tpos: i32) -> bool {
         // contain transcript coordinate
         if self.tstart <= tpos && tpos <= self.tend {
             return true
@@ -148,6 +148,11 @@ impl Bed12Record {
     /// ---
     /// 
     /// Get block sizes for in the genomic ranges for the transcript range
+    ///            tstart                              tend
+    ///            |->                                 ||
+    ///  tx:   |===================|-----------|============|
+    ///  blocks:   |---------------|           |-------|   
+    ///                
     /// 
     /// Args:
     ///     tstart (int): leftmost position on the transcript
@@ -161,8 +166,8 @@ impl Bed12Record {
         assert!(tstart > 0);
         let mut block_starts: Vec<i32> = vec![];
         let mut block_ends: Vec<i32> = vec![];
-        let block_start: i32;
-        let block_end: i32;
+        let mut block_start: i32;
+        let mut block_end: i32;
         let exon_start = 0;
         let exon_end = 0;
         let mut collect = 0;
