@@ -81,11 +81,19 @@ def test_block():
         block_starts, block_ends = r.blocks(10,280)
 
         assert(len(block_starts) == 3)
-        assert(block_starts[0] == r.start + 10 + 1)
+        assert(block_starts[0] == r.start + 10 - 1)
         assert(block_starts[1] == r.exons[1].gstart)
         assert(block_starts[2] == r.exons[2].gstart)
         assert(block_ends[0] == r.exons[0].gend)
         assert(block_ends[1] == r.exons[1].gend)
         assert(block_ends[2] == r.exons[2].gstart + 38  - 1)
 
+        bedline = next(f)
+        r = biotools_lib.Bed12Record(bedline.strip())
+        block_starts, block_ends = r.blocks(10,280)
 
+        assert(len(block_starts) == 4)
+        assert(block_ends[-1] == r.end - 10 + 1)
+        assert(block_starts[-1] == r.exons[0].gstart )
+        assert(block_ends[0] == r.exons[3].gend)
+        assert(block_starts[0] == r.exons[3].gend - 73 + 1)
