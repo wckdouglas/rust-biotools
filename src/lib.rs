@@ -60,6 +60,7 @@ fn fq_stat(filename: String) -> PyResult<(usize, usize)>{
 fn kmer_counter(seq: String, k: usize) -> PyResult<HashMap<String, usize>>{
     let mut kmer_count: HashMap<String, usize> = HashMap::new();
     let seq_len: usize = seq.len().try_into().unwrap();
+    assert!(seq_len > k, "k is smaller than seq length");
     for i in 0..(seq_len - k + 1){
         //let kmer = utils::substring(seq, i, i+k);
         let kmer = seq[i..(i+k)].to_string();
