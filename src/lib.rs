@@ -7,6 +7,7 @@ use std::convert::TryInto;
 use bio::io::fastq;
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
+use pyo3::exceptions::PyValueError;
 mod utils;
 mod bed;
 mod bed12;
@@ -60,13 +61,16 @@ fn fq_stat(filename: String) -> PyResult<(usize, usize)>{
 fn kmer_counter(seq: String, k: usize) -> PyResult<HashMap<String, usize>>{
     let mut kmer_count: HashMap<String, usize> = HashMap::new();
     let seq_len: usize = seq.len().try_into().unwrap();
-    assert!(seq_len > k, "k is smaller than seq length");
-    for i in 0..(seq_len - k + 1){
-        //let kmer = utils::substring(seq, i, i+k);
-        let kmer = seq[i..(i+k)].to_string();
-        *kmer_count.entry(kmer).or_insert(0) += 1;
-    }
-    Ok(kmer_count)
+    if (seq_len < k) {
+        Err(PyValueError::new_err("k is smaller than sequence length"))
+    } else {
+		for i in 0..(seq_len - k + 1){
+			//let kmer = utils::substring(seq, i, i+k);
+			let kmer = seq[i..(i+k)].to_string();
+			*kmer_count.entry(kmer).or_insert(0) += 1;
+		}
+		Ok(kmer_count)
+	}
 }
 
 

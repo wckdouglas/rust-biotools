@@ -2,6 +2,7 @@ import os
 from urllib.request import Request, urlopen
 import biotools_lib
 import gzip
+import pytest
 DataDir = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -30,6 +31,13 @@ def test_kmer():
     kmer_dict = biotools_lib.kmer_counter('ACTGACTG', 3)
     for k,v in {'GAC': 1, 'CTG': 2, 'ACT': 2, 'TGA': 1}.items():
         assert(kmer_dict[k] == v)
+
+
+def test_kmer_large_k():
+    with pytest.raises(ValueError) as exinfo: 
+        biotools_lib.kmer_counter('ACTGACTG', 10)
+
+    assert "k is smaller than sequence length" in str(exinfo)
 
 
 def test_bed():
