@@ -1,38 +1,36 @@
-extern crate pyo3;
 extern crate bio;
 extern crate flate2;
-use std::string::String;
-use std::collections::HashMap;
-use std::convert::TryInto;
+extern crate pyo3;
 use bio::io::fastq;
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
-use pyo3::exceptions::PyValueError;
-mod utils;
+use std::collections::HashMap;
+use std::convert::TryInto;
+use std::string::String;
 mod bed;
 mod bed12;
-
-
+mod utils;
 
 #[pyfunction]
 /// ---
-/// 
+///
 /// Function to calculate how many bases and how many record in the fastq file
-/// 
+///
 /// Args:
 ///     filename: str
 ///         full path to the fastq file, can be gz zipped file
-/// 
+///
 /// return:
 ///     read_count: int
 ///         how many reads are in the fastq file?
 ///     base_count: int
 ///         how many bases in total are in the fastq file?
-fn fq_stat(filename: String) -> PyResult<(usize, usize)>{
+fn fq_stat(filename: String) -> PyResult<(usize, usize)> {
     let reader = fastq::Reader::new(utils::read_file(&filename));
     let mut basecount = 0;
     let mut readcount = 0;
-    for result in reader.records(){
+    for result in reader.records() {
         let record = result.expect("Error during fastq record parsing");
         let seq = record.seq();
         let len = seq.len();
@@ -42,38 +40,35 @@ fn fq_stat(filename: String) -> PyResult<(usize, usize)>{
     Ok((readcount, basecount))
 }
 
-
 #[pyfunction]
 #[text_signature = "(seq, k, /)"]
 /// --
 ///
 /// counting kmer from the input sequence
-/// 
+///
 /// Args:
 ///     seq: str
 ///         read sequence
 ///     k: int
 ///         kmer size
-/// 
+///
 /// Return:
 ///     kmer_dict: dict
 ///         with kmer as key and, kmer count as value
-fn kmer_counter(seq: String, k: usize) -> PyResult<HashMap<String, usize>>{
+fn kmer_counter(seq: String, k: usize) -> PyResult<HashMap<String, usize>> {
     let mut kmer_count: HashMap<String, usize> = HashMap::new();
     let seq_len: usize = seq.len().try_into().unwrap();
     if (seq_len < k) {
         Err(PyValueError::new_err("k is smaller than sequence length"))
     } else {
-		for i in 0..(seq_len - k + 1){
-			//let kmer = utils::substring(seq, i, i+k);
-			let kmer = seq[i..(i+k)].to_string();
-			*kmer_count.entry(kmer).or_insert(0) += 1;
-		}
-		Ok(kmer_count)
-	}
+        for i in 0..(seq_len - k + 1) {
+            //let kmer = utils::substring(seq, i, i+k);
+            let kmer = seq[i..(i + k)].to_string();
+            *kmer_count.entry(kmer).or_insert(0) += 1;
+        }
+        Ok(kmer_count)
+    }
 }
-
-
 
 /// A Python module implemented in Rust.
 #[pymodule]
